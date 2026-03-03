@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import Plotly from 'plotly.js-dist-min';
 
+// Responsive chart height: smaller on mobile, full on desktop
+const chartH = () => window.innerWidth <= 480 ? 260 : window.innerWidth <= 768 ? 330 : window.innerWidth <= 1024 ? 390 : 460;
+
 const LAYOUT_BASE = {
     paper_bgcolor: 'transparent',
     plot_bgcolor: 'transparent',
@@ -83,7 +86,7 @@ export function MAChart({ data, windows }) {
         }, CONFIG);
     }, [data, windows]);
 
-    return <div ref={ref} style={{ width: '100%', height: 420 }} />;
+    return <div ref={ref} style={{ width: '100%', height: chartH() }} />;
 }
 
 /* ──────────────── Prediction Chart ─────────────────────── */
@@ -114,12 +117,22 @@ export function PredictionChart({ data }) {
             {
                 x: data.dates,
                 y: data.predicted,
-                name: 'AI Predicted',
+                name: 'AI Predicted (Test)',
                 type: 'scatter',
                 mode: 'lines',
                 line: { color: '#3fb950', width: 2, dash: 'dot' },
                 fill: 'tonexty',
                 fillcolor: 'rgba(63,185,80,.06)',
+            },
+            {
+                x: data.future_dates,
+                y: data.future_predicted,
+                name: 'Future Forecast (30d)',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#bc8cff', width: 3 },
+                marker: { size: 4 },
+                connectgaps: true,
             },
         ];
 
@@ -164,10 +177,36 @@ export function OverviewChart({ data }) {
             },
             xaxis: {
                 ...LAYOUT_BASE.xaxis,
-                rangeslider: { visible: false },
+                rangeselector: {
+                    buttons: [
+                        { count: 1, label: '1M', step: 'month', stepmode: 'backward' },
+                        { count: 3, label: '3M', step: 'month', stepmode: 'backward' },
+                        { count: 6, label: '6M', step: 'month', stepmode: 'backward' },
+                        { count: 1, label: '1Y', step: 'year', stepmode: 'backward' },
+                        { count: 3, label: '3Y', step: 'year', stepmode: 'backward' },
+                        { step: 'all', label: 'ALL' },
+                    ],
+                    bgcolor: 'rgba(15,31,56,.8)',
+                    activecolor: 'rgba(56,139,253,.35)',
+                    bordercolor: 'rgba(56,139,253,.2)',
+                    borderwidth: 1,
+                    font: { color: '#8b949e', size: 11 },
+                },
+                rangeslider: {
+                    visible: true,
+                    bgcolor: 'rgba(15,31,56,.6)',
+                    bordercolor: 'rgba(56,139,253,.15)',
+                    thickness: 0.07,
+                },
+                // Default view: ~last 1 year (252 trading days)
+                range: [
+                    data[Math.max(0, data.length - 252)].Date,
+                    data[data.length - 1].Date
+                ],
+                type: 'date',
             },
         }, CONFIG);
     }, [data]);
 
-    return <div ref={ref} style={{ width: '100%', height: 380 }} />;
+    return <div ref={ref} style={{ width: '100%', height: chartH() }} />;
 }

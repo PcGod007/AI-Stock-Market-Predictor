@@ -14,3 +14,6 @@ export const fetchMovingAverage = (ticker, start, end, windows) =>
 
 export const fetchPrediction = (ticker, start, end) =>
   axios.get(`${BASE}/predict`, { params: { ticker, start, end } }).then(r => r.data);
+
+export const fetchNews = (ticker) =>
+  axios.get(`${BASE}/news`, { params: { ticker } }).then(r => r.data);

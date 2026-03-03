@@ -56,42 +56,74 @@ export default function ComparisonTable({ data }) {
             </div>
 
             {/* Table */}
-            <div className="table-container" style={{ maxHeight: '52vh', overflowY: 'auto' }}>
-                <table className="data-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Original ($)</th>
-                            <th>Predicted ($)</th>
-                            <th>Error ($)</th>
-                            <th>Error %</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <AnimatePresence mode="wait">
-                            {slice.map((r, i) => (
-                                <motion.tr
-                                    key={r.date}
-                                    initial={{ opacity: 0, x: -6 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: i * .01, duration: .16 }}
-                                >
-                                    <td className="td-mono" style={{ color: 'var(--text-secondary)' }}>{r.date}</td>
-                                    <td className="td-mono">{fmt(r.original)}</td>
-                                    <td className="td-mono" style={{ color: 'var(--accent-blue)' }}>{fmt(r.predicted)}</td>
-                                    <td className={`td-mono ${r.error >= 0 ? 'td-up' : 'td-down'}`}>
-                                        {r.error >= 0 ? '+' : ''}{fmt(r.error)}
-                                    </td>
-                                    <td>
-                                        <span className={`badge ${Math.abs(r.pct) < 3 ? 'badge-green' : Math.abs(r.pct) < 6 ? 'badge-blue' : 'badge-red'}`}>
-                                            {r.pct >= 0 ? '+' : ''}{r.pct.toFixed(2)}%
-                                        </span>
-                                    </td>
-                                </motion.tr>
-                            ))}
-                        </AnimatePresence>
-                    </tbody>
-                </table>
+            {/* Future Forecast Section (if stays on final page or via toggle) */}
+            {data.future_dates && (
+                <div style={{ marginTop: '1.5rem', border: '1px solid rgba(188,140,255, .2)', borderRadius: '12px', padding: '1.25rem', background: 'rgba(188,140,255, .03)' }}>
+                    <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '.5rem', color: '#bc8cff', fontSize: '1.1rem' }}>
+                        🔮 Future Price Forecast (Next 30 Days)
+                    </h3>
+                    <div className="table-container" style={{ maxHeight: '40vh' }}>
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Predicted Close ($)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {data.future_dates.map((d, i) => (
+                                    <tr key={d}>
+                                        <td className="td-mono" style={{ color: 'var(--text-secondary)' }}>{d}</td>
+                                        <td className="td-mono" style={{ color: '#bc8cff', fontWeight: 'bold' }}>
+                                            ${fmt(data.future_predicted[i])}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* ─── Educational Reasoning Section ─── */}
+            <div style={{
+                marginTop: '1.5rem',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                background: 'rgba(56,139,253,.05)',
+                border: '1px solid rgba(56,139,253,.15)',
+                lineHeight: '1.6'
+            }}>
+                <h3 style={{ margin: '0 0 1rem 0', color: '#e6edf3', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+                    <span style={{ fontSize: '1.2rem' }}>💡</span> How the AI Prediction Works
+                </h3>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                    <div>
+                        <h4 style={{ color: '#388bfd', margin: '0 0 .5rem 0', fontSize: '.95rem' }}>1. Pattern Recognition (LSTM)</h4>
+                        <p style={{ margin: 0, fontSize: '.9rem', color: '#8b949e' }}>
+                            We use a <strong>Long Short-Term Memory (LSTM)</strong> neural network. Unlike simple models, it can "remember" long-term trends and short-term fluctuations simultaneously by analyzing the last 100 days of price data.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 style={{ color: '#bc8cff', margin: '0 0 .5rem 0', fontSize: '.95rem' }}>2. Sliding Window Forecast</h4>
+                        <p style={{ margin: 0, fontSize: '.9rem', color: '#8b949e' }}>
+                            To predict 30 days ahead, the AI uses its own predictions as input for the next day. This creates a "sliding window" that projects momentum into the future based strictly on numerical patterns.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 style={{ color: '#ff7b72', margin: '0 0 .5rem 0', fontSize: '.95rem' }}>3. Important Limitations</h4>
+                        <p style={{ margin: 0, fontSize: '.9rem', color: '#8b949e' }}>
+                            This is <strong>Technical Analysis</strong>. The AI does not know about news, earnings reports, or market events. Predictions become less certain the further they project into the future due to compound error.
+                        </p>
+                    </div>
+                </div>
+
+                <div style={{ marginTop: '1rem', borderTop: '1px solid rgba(56,139,253, .1)', paddingTop: '1rem', fontSize: '.85rem', color: '#8b949e', fontStyle: 'italic' }}>
+                    Note: Predictions are for educational purposes only. Always perform your own due diligence before making financial decisions.
+                </div>
             </div>
         </div>
     );
